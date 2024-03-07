@@ -68,7 +68,7 @@ void findParents(std::vector<Program> &programs)
 	}
 }
 
-std::pair<uint64_t,uint64_t> findGroupZero(const std::vector<Program> &programs)
+std::pair<uint64_t,uint64_t> findGroups(const std::vector<Program> &programs)
 {
 	std::pair<uint64_t,uint64_t> result;
 	std::unordered_map<unsigned int, unsigned int> groups;
@@ -94,7 +94,7 @@ int main()
 	parseInput(programs);
 	findParents(programs);
 	
-	result = findGroupZero(programs);
+	result = findGroups(programs);
 	
 	std::cout << "resultA: " << result.first << '\n';
 	std::cout << "resultB: " << result.second << std::endl;
