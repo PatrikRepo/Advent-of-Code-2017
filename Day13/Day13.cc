@@ -3,7 +3,15 @@
 #include <vector>
 #include <utility>
 
-void parseInput(std::vector<std::pair<unsigned int, std::vector<unsigned int>>> &scanners)
+struct Scanner
+{
+	unsigned int depth = 0;
+	unsigned int pos = 0;
+	unsigned int range = 0;
+	unsigned int states = 0;
+};
+
+void parseInput(std::vector<Scanner> &scanners)
 {
 	std::string line;
 	
@@ -12,88 +20,38 @@ void parseInput(std::vector<std::pair<unsigned int, std::vector<unsigned int>>> 
 	{
 		while(getline(input, line))
 		{
+			Scanner scanner;
 			size_t pos = 0;
 			size_t endpos = line.find_first_of(":");
-			unsigned int depth = std::stoi(line.substr(0, endpos));
+			scanner.depth = std::stoi(line.substr(0, endpos));
 			
 			pos = line.find_first_of("1234567890", endpos);
-			unsigned int range = std::stoi(line.substr(pos));
+			scanner.range = std::stoi(line.substr(pos));
+			scanner.states = scanner.range*2 - 2;
+			scanner.pos = scanner.depth%scanner.states;
 			
-			std::vector<unsigned int> layer;
-			for(unsigned int i=0; i<range; i++)
-			{
-				layer.push_back(0);
-			}	
-			
-			bool down = true;
-			if((depth/(range-1))%2 == 1)
-			{
-				down = false;
-			}
-			if(down)
-			{
-				layer[depth%(range-1)] = 1;
-			}
-			else
-			{
-				layer[range-1 - (depth%(range-1))] = 1;
-			}
-			
-			scanners.push_back(std::make_pair(depth, layer));
+			scanners.push_back(scanner);
 		}
 	}
 	input.close();
 }
 
-uint64_t calculateSeverity(std::vector<std::pair<unsigned int, std::vector<unsigned int>>> &scanners)
+uint64_t calculateSeverity(std::vector<Scanner> &scanners)
 {
 	uint64_t result = 0;
-	
+
 	for(unsigned int i=0; i<scanners.size(); i++)
 	{
-		if(scanners[i].second[0] == 1)
+		if(scanners[i].pos == 0)
 		{
-			result += scanners[i].first*scanners[i].second.size();
+			result += scanners[i].depth*scanners[i].range;
 		}
 	}
 	
 	return result;
 }
 
-void moveStep(std::pair<unsigned int, std::vector<unsigned int>> &scanner, uint64_t step)
-{
-	bool down = true;
-	unsigned int depth = scanner.first;
-	unsigned int range = scanner.second.size();
-	
-	if(((step + depth)/(range-1))%2 == 1)
-	{
-		down = false;
-	}
-	if(down)
-	{
-		scanner.second[(step + depth)%(range-1)] = 0;
-	}
-	else
-	{
-		scanner.second[range-1 - ((step + depth)%(range-1))] = 0;
-	}
-	down = true;
-	if(((step + 1 + depth)/(range-1))%2 == 1)
-	{
-		down = false;
-	}
-	if(down)
-	{
-		scanner.second[(step + 1 + depth)%(range-1)] = 1;
-	}
-	else
-	{
-		scanner.second[range-1 - ((step + 1 + depth)%(range-1))] = 1;
-	}
-}
-
-uint64_t calculateDelay(std::vector<std::pair<unsigned int, std::vector<unsigned int>>> &scanners)
+uint64_t calculateDelay(std::vector<Scanner> &scanners)
 {
 	uint64_t result = 0;
 	bool found = false;
@@ -103,18 +61,18 @@ uint64_t calculateDelay(std::vector<std::pair<unsigned int, std::vector<unsigned
 		found = true;
 		for(unsigned int i=0; i<scanners.size(); i++)
 		{
-			if(scanners[i].second[0] == 1)
+			if(scanners[i].pos == 0)
 			{
 				found = false;
 			}
-			moveStep(scanners[i], result);
+			scanners[i].pos += 2;
+			scanners[i].pos %= scanners[i].states;
 		}
 		if(!found)
 		{
-			result++;
+			result += 2;
 		}
 	}
-
 	
 	return result;
 }
@@ -123,7 +81,7 @@ int main()
 {
 	uint64_t resultA = 0;
 	uint64_t resultB = 0;
-	std::vector<std::pair<unsigned int, std::vector<unsigned int>>> scanners;
+	std::vector<Scanner> scanners;
 	
 	parseInput(scanners);
 	
