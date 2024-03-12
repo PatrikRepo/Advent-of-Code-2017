@@ -2,7 +2,6 @@
 #include <fstream>
 #include <vector>
 #include <tuple>
-#include <unordered_map>
 
 void parseInput(std::vector<std::tuple<char, std::string, std::string>> &instructions)
 {
